@@ -1,6 +1,5 @@
+import json
 from datetime import datetime
-
-
 
 class Task:
     def __init__(self,title,due_date):
@@ -54,10 +53,13 @@ class TaskManager:
             print(index,task)
 
     def delete_task(self,index):
-        if 0 <= index < len(self.tasks):
+        if index < 0 or index >= len(self.tasks):
             self.tasks.pop(index)
-        else:
-            print(f"sorry {index} cannot excits ")    
+
+        else:    
+            raise IndexError("task index out of range")
+            
+        
             
 
     def complete_task(self,index):
@@ -67,28 +69,49 @@ class TaskManager:
             print(f"invalid index {index}")    
             
 
-
     def save_tasks(self):
-            with open("taskmanager.txt","w") as file:
-                for task in self.tasks:
-                    file.write(f"{str(task)}\n")    
+        data=[]
+
+        for task in self.tasks:
+            task_data={
+                "title":task.title,
+                "due_date":task.due_date,
+                "completed":task.completed
+            }
+
+            data.append(task_data)
+        
+            with open("tasksdata.json","w") as file:
+                json.dump(data,file,indent=4)
+        
 
 
-    def load_task(self):
-        try:
-            with open("taskmanager.txt","r") as file:
-                for line in file:
-                    newline=line.strip()
-                    title,due_date,status=newline.split("|")
+    def load_tasks(self):
+            
+        try:    
+            with open("tasksdata.json","r") as file:
+                data=json.load(file)
+
+            for task_data in data:
+                    title=task_data["title"]
+                    due_date=task_data["due_date"]    
+                    completed=task_data["completed"]
+
                     task=Task(title,due_date)
-                    if status=="completed":
-                        task.complete_task() 
-                    self.tasks.append(task)
+
+                    if completed:
+                        task.complete_task()
+            
+                    self.tasks.append(task)    
+
         except FileNotFoundError:
             pass
+    # def search_task(self):
+    #     title=input("enter the task title to search:")        
+    #     for title in data
 
 manager=TaskManager() 
-manager.load_task()
+manager.load_tasks()
 while True:
     print("MENU")
     print("1-->Add Task")
@@ -97,35 +120,65 @@ while True:
     print("4-->Save Task")
     print("5-->complete Task")
     print("6-->exit")
+# ---------------------ADD TASK---------------------
+    try:
+        choice=int(input("enter your choice:"))
+    except ValueError:
+        print("please enter a number ")  
+        continue  
+    if choice==1:
+                try:
+                    title=input("enter title of the task:")
+                    due_date=(input("enter due date of the task(DD/MM/YYYY):"))
+                    datetime.strptime(due_date,"%d-%m-%Y")
+                    task=Task(title,due_date)
 
-    choice=input("enter your choice:")
-    if choice=="1":
-        title=input("enter title of the task:")
-        due_date=input("enter due date of the task:")
-        task=Task(title,due_date)
-        manager.add_task(task)
+                    manager.add_task(task)
+                    manager.save_tasks()
+                    print("task added and saved")
 
-    elif choice=="2":
-        manager.view_tasks()    
+                except ValueError:
+                    print("date must be DD-MM-YYYY format")    
+# ---------------------VIEW TASK---------------------
+    elif choice==2:
+            manager.view_tasks()    
+# --------------------DELETE TASK----------------------
 
-    elif choice=="3":
-        index=int(input("enter the task number to delete task:"))    
-        manager.delete_task(index)
-        print("Task deleted")
+    elif choice==3:
+                try:
+                    index=input("enter the task number to delete task:")
+                    manager.delete_task(index)
+                    manager.save_tasks()
+                    print("Task deleted")
 
-    elif choice=="4":
-        manager.save_tasks()    
-        print("Task Saved")
+                except ValueError:
+                    print("please enter a number")    
 
-    elif choice=="5":
-        index=int(input("enter the task number to complete task:"))
-        manager.complete_task(index)
+                except IndexError:
+                    print("please enter valid index number")
 
-    elif choice=="6":
-        manager.save_tasks()    
+        # ====================SAVE TASK===================
+    elif choice==4:
+                manager.save_tasks()    
+                print("Task Saved")
+        # =================COMPLETE  TASK==================
+    elif choice==5:
+                try:
+                    index=int(input("enter the task number to complete task:"))
+                    manager.complete_task(index)
+                    manager.save_tasks()
+                    print("task completed and saved")
 
-        print("Thank you")    
-        break
+                except ValueError:
+                    print("please enter a number")
+
+                except IndexError:
+                    print("please enter valid index number")
+
+        # ====================EXIT========================
+    elif choice==6:    
+                print("Thank you")    
+                break
 
 
 
