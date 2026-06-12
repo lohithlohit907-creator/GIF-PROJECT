@@ -1,6 +1,28 @@
 import json
 from datetime import datetime
+# ===================tasknotfounderror==================?
+class TasknotfoundError(Exception):
+     
+     def __init__(self,task_id):
+          self.task_id=task_id
 
+          super().__init__(f"task {task_id} not found")
+# ==============invalidmenuchoiceerror=================
+class InvalidMenuChoiceError(Exception):
+     
+     def __init__(self, choice):
+          self.choice=choice
+
+          super().__init__(f"invalid menu choice:{choice}")
+
+# ================invalid index error=========================
+class InvalidIndexIDError(Exception):
+     
+     def __init__(self, index):
+          self.index = index
+
+          super().__init__(f" Error:Invalid Index ID {index} ")
+# =====================================================================
 class Task:
     def __init__(self,title,due_date):
         self.title=title
@@ -53,20 +75,18 @@ class TaskManager:
             print(index,task)
 
     def delete_task(self,index):
-        if index < 0 or index >= len(self.tasks):
-            self.tasks.pop(index)
-
-        else:    
-            raise IndexError("task index out of range")
-            
-        
-            
-
+        if index<0 or index >= len(self.tasks):
+            raise TasknotfoundError (index)
+        else :
+             self.tasks.pop(index)
+    
     def complete_task(self,index):
-        if 0 <= index < len(self.tasks):
-            self.tasks[index].complete_task()
+        if index <0 or index >= len(self.tasks):
+            raise TasknotfoundError(index)
         else:
-            print(f"invalid index {index}")    
+            manager.complete_task(index)    
+            manager.save_tasks()
+            print("task completed and saved")
             
 
     def save_tasks(self):
@@ -106,9 +126,7 @@ class TaskManager:
 
         except FileNotFoundError:
             pass
-    # def search_task(self):
-    #     title=input("enter the task title to search:")        
-    #     for title in data
+    
 
 manager=TaskManager() 
 manager.load_tasks()
@@ -120,12 +138,16 @@ while True:
     print("4-->Save Task")
     print("5-->complete Task")
     print("6-->exit")
-# ---------------------ADD TASK---------------------
+# ________________________________________________________________________
     try:
         choice=int(input("enter your choice:"))
-    except ValueError:
-        print("please enter a number ")  
-        continue  
+        if choice < 0 or choice >6:
+            raise InvalidMenuChoiceError(choice) 
+
+    except InvalidMenuChoiceError as e:
+         print(e)
+    
+# ---------------------ADD TASK---------------------
     if choice==1:
                 try:
                     title=input("enter title of the task:")
@@ -146,25 +168,27 @@ while True:
 
     elif choice==3:
                 try:
-                    index=input("enter the task number to delete task:")
-                    manager.delete_task(index)
-                    manager.save_tasks()
-                    print("Task deleted")
+                    index=int(input("enter task id:"))
 
-                except ValueError:
-                    print("please enter a number")    
 
-                except IndexError:
-                    print("please enter valid index number")
+                except TasknotfoundError as e:
+                     print (e)    
 
-        # ====================SAVE TASK===================
+                except InvalidIndexIDError as e:
+                     print(e)
+
+                else :
+                     manager.delete_task(index)    
+                     manager.save_tasks() 
+                     print("task deleted")
+# ===================================SAVE TASK===================
     elif choice==4:
                 manager.save_tasks()    
                 print("Task Saved")
-        # =================COMPLETE  TASK==================
+# ====================COMPLETE  TASK==================
     elif choice==5:
                 try:
-                    index=int(input("enter the task number to complete task:"))
+                    index=int(input("enter the task id to complete task:"))
                     manager.complete_task(index)
                     manager.save_tasks()
                     print("task completed and saved")
