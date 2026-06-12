@@ -1,5 +1,11 @@
+import logging
 import json
 from datetime import datetime
+# ======================logging====================
+logging.basicConfig(
+     filename="task_manager.log",
+     level=logging.INFO
+)
 # ===================tasknotfounderror==================?
 class TasknotfoundError(Exception):
      
@@ -85,6 +91,7 @@ class TaskManager:
         if index <0 or index >= len(self.tasks):
             raise TasknotfoundError(index)
         
+        self.tasks[index].complete_task()
             
 
     def save_tasks(self):
@@ -99,8 +106,8 @@ class TaskManager:
 
             data.append(task_data)
         
-            with open("tasksdata.json","w") as file:
-                json.dump(data,file,indent=4)
+        with open("tasksdata.json","w") as file:
+            json.dump(data,file,indent=4)
         
 
 
@@ -139,11 +146,16 @@ while True:
 # ________________________________________________________________________
     try:
         choice=int(input("enter your choice:"))
-        if choice < 0 or choice >6:
+        if choice < 1 or choice >6:
             raise InvalidMenuChoiceError(choice) 
+        
+    except ValueError:
+         print("please enter a number")
+         continue
 
     except InvalidMenuChoiceError as e:
          print(e)
+         continue
     
 # ---------------------ADD TASK---------------------
     if choice==1:
@@ -155,10 +167,10 @@ while True:
 
                     manager.add_task(task)
                     manager.save_tasks()
-                    print("task added and saved")
+                    logging.info("task added and saved")
 
                 except ValueError:
-                    print("date must be DD-MM-YYYY format")    
+                    logging.warning("date must be DD-MM-YYYY format")    
 # ---------------------VIEW TASK---------------------
     elif choice==2:
             manager.view_tasks()    
@@ -167,43 +179,45 @@ while True:
     elif choice==3:
                 try:
                     index=int(input("enter task id:"))
+                    manager.delete_task(index)    
+                    manager.save_tasks() 
+                    logging.info("task deleted ")
 
 
                 except TasknotfoundError as e:
                      print (e)    
+                     logging.error(str(e))
 
                 except InvalidIndexIDError as e:
-                     print(e)
-
-                else :
-                     manager.delete_task(index)    
-                     manager.save_tasks() 
-                     print("task deleted")
+                     logging.warning(str(e))
+                
+                except ValueError:
+                     logging.warning("please enter number")    
+                     
 # ===================================SAVE TASK===================
     elif choice==4:
                 manager.save_tasks()    
-                print("Task Saved")
+                logging.info("Task Saved")
 # ====================COMPLETE  TASK==================
     elif choice==5:
                 try:
                     index=int(input("enter the task id to complete task:"))
+                    manager.complete_task(index)    
+                    manager.save_tasks()
+                    logging.info("task completed and saved")
                     
 
                 except TasknotfoundError as e:
                     print(e)
-
+                    logging.error(str(e))
                 except InvalidIndexIDError as e:
                     print(e)
-
-                else:
-                     
-                     manager.complete_task(index)    
-                     manager.save_tasks()
-                     print("task completed and saved")
-
-        # ====================EXIT========================
+                    logging.warning(str(e))
+                except ValueError:
+                     logging.warning("please enter number")    
+# ========================EXIT========================
     elif choice==6:    
-                print("Thank you")    
+                print.info("Thank you")    
                 break
 
 
