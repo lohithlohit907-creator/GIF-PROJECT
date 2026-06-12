@@ -77,16 +77,14 @@ class TaskManager:
     def delete_task(self,index):
         if index<0 or index >= len(self.tasks):
             raise TasknotfoundError (index)
-        else :
-             self.tasks.pop(index)
+        
+        self.tasks.pop(index)
+            
     
     def complete_task(self,index):
         if index <0 or index >= len(self.tasks):
             raise TasknotfoundError(index)
-        else:
-            manager.complete_task(index)    
-            manager.save_tasks()
-            print("task completed and saved")
+        
             
 
     def save_tasks(self):
@@ -189,15 +187,19 @@ while True:
     elif choice==5:
                 try:
                     index=int(input("enter the task id to complete task:"))
-                    manager.complete_task(index)
-                    manager.save_tasks()
-                    print("task completed and saved")
+                    
 
-                except ValueError:
-                    print("please enter a number")
+                except TasknotfoundError as e:
+                    print(e)
 
-                except IndexError:
-                    print("please enter valid index number")
+                except InvalidIndexIDError as e:
+                    print(e)
+
+                else:
+                     
+                     manager.complete_task(index)    
+                     manager.save_tasks()
+                     print("task completed and saved")
 
         # ====================EXIT========================
     elif choice==6:    
